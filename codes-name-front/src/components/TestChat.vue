@@ -16,7 +16,7 @@
 <script setup lang="ts">
 import { onMounted, ref, Ref } from 'vue';
 import { useSocketIO } from '../customHooks/useSocketIO';
-import { ChatMessage } from '../types/index';
+import { ChatMessage } from '../../../types/index';
 
 const { username, room } = defineProps({
   username: String,
@@ -30,17 +30,17 @@ const messageInput = ref('');
 
 const handleSendMessage = () => {
   if (messageInput.value !== '') {
-    socket.send('message', { sender: username, room, message: messageInput });
+    socket.emit('message', { sender: username, room, message: messageInput });
+    messageInput.value = '';
   }
 };
 
 socket.on('messageClient', (message: ChatMessage) => {
   messages.value.push(message);
-  messageInput.value = '';
 });
 
 onMounted(() => {
-  socket.send('joinRoom', room);
+  socket.emit('joinRoom', room);
 });
 </script>
 

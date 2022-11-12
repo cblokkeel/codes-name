@@ -1,18 +1,43 @@
 import { Logger } from '@nestjs/common';
 import {
   MessageBody,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
-@WebSocketGateway()
-export class GameGateway {
+@WebSocketGateway(8000, {
+  path: '/websockets',
+  serveClient: true,
+  namespace: '/',
+})
+export class GameGateway
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server: Server;
 
   private logger: Logger = new Logger('GameGateway');
+
+  /*
+   * CONNECTION
+   */
+
+  afterInit(server: Server) {
+    this.logger.log('Initialized');
+  }
+
+  handleConnection(client: Socket, ...args: any[]) {
+    this.logger.log(`User connected: ${client.id}`);
+  }
+
+  handleDisconnect(client: Socket) {
+    this.logger.log(`User disconected: ${client.id}`);
+  }
 
   /*
    * ROOMS
