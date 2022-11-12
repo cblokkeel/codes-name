@@ -2,5 +2,10 @@
   "name": "codes-name",
   "version": "1.0.0",
   "main": "index.js",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "server": "yarn --cwd ./codes-name-api start:dev",
+    "client": "yarn --cwd ./codes-name-front dev",
+    "dev": "concurrently \"yarn run server\" \"yarn run client\""
+  }
 }
