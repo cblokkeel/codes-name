@@ -23,24 +23,29 @@ const { username, room } = defineProps({
   room: String,
 });
 
-const { socket } = useSocketIO('http://localhost:3000');
+if (!room || room.trim() === '') {
+  throw new Error('incorrect room');
+}
+
+const { socket } = useSocketIO('http://localhost:3000', room);
 
 const messages: Ref<ChatMessage[]> = ref([]);
 const messageInput = ref('');
 
 const handleSendMessage = () => {
   if (messageInput.value !== '') {
-    socket.emit('message', { sender: username, room, message: messageInput });
+    socket.emit('message', {
+      sender: username,
+      room,
+      messageText: messageInput.value,
+    });
     messageInput.value = '';
   }
 };
 
 socket.on('messageClient', (message: ChatMessage) => {
+  console.log('receiving message', message);
   messages.value.push(message);
-});
-
-onMounted(() => {
-  socket.emit('joinRoom', room);
 });
 </script>
 

@@ -11,7 +11,7 @@ import {
 import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway(8000, {
-  path: '/websockets',
+  path: '/games',
   serveClient: true,
   namespace: '/',
 })
@@ -31,7 +31,7 @@ export class GameGateway
     this.logger.log('Initialized');
   }
 
-  handleConnection(client: Socket, ...args: any[]) {
+  handleConnection(client: Socket) {
     this.logger.log(`User connected: ${client.id}`);
   }
 
@@ -45,12 +45,14 @@ export class GameGateway
 
   @SubscribeMessage('joinRoom')
   handleJoinRoom(client: Socket, room: string) {
+    this.logger.log(`User ${client.id} joined ${room} room`);
     client.join(room);
     client.emit('joinRoom', room);
   }
 
   @SubscribeMessage('leaveRoom')
   handleLeaveRoom(client: Socket, room: string) {
+    this.logger.log(`User ${client.id} left ${room} room`);
     client.leave(room);
     client.emit('leftRoom', room);
   }
@@ -61,9 +63,15 @@ export class GameGateway
 
   @SubscribeMessage('message')
   handleTest(
-    @MessageBody() message: { sender: string; room; string; message: string },
+    @MessageBody()
+    message: {
+      sender: string;
+      room: string;
+      messageText: string;
+    },
   ) {
-    const { sender, room, message: messageText } = message;
+    const { sender, room, messageText } = message;
+    this.logger.log(`${sender} said: ${messageText} in room ${room}`);
     this.server.to(room).emit('messageClient', message);
   }
 }
